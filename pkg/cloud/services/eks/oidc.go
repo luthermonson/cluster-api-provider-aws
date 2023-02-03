@@ -34,6 +34,7 @@ import (
 	"sigs.k8s.io/cluster-api-provider-aws/v2/cmd/clusterawsadm/converters"
 	iamv1 "sigs.k8s.io/cluster-api-provider-aws/v2/iam/api/v1beta1"
 	tagConverter "sigs.k8s.io/cluster-api-provider-aws/v2/pkg/cloud/converters"
+	iamService "sigs.k8s.io/cluster-api-provider-aws/v2/pkg/cloud/services/iam"
 	"sigs.k8s.io/cluster-api/controllers/remote"
 )
 
@@ -128,7 +129,7 @@ func (s *Service) reconcileTrustPolicy() error {
 	}
 
 	trustPolicyConfigMap.Data = map[string]string{
-		"trust-policy.json": policy,
+		iamService.TrustPolicyJSON: policy,
 	}
 
 	if trustPolicyConfigMap.UID == "" {

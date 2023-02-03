@@ -26,7 +26,7 @@ import (
 type KubeProxyScope interface {
 	cloud.ClusterScoper
 
-	// RemoteClient returns the Kubernetes client for connecting to the workload cluster.
+	// RemoteClient returns the Kubernetes Client for connecting to the workload cluster.
 	RemoteClient() (client.Client, error)
 	// DisableKubeProxy returns whether kube-proxy daemonset is to be disabled
 	DisableKubeProxy() bool

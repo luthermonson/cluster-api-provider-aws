@@ -94,7 +94,7 @@ func (m *MachinePoolScope) GetProviderID() string {
 // This is meant to be called for each reconcile iteration.
 func NewMachinePoolScope(params MachinePoolScopeParams) (*MachinePoolScope, error) {
 	if params.Client == nil {
-		return nil, errors.New("client is required when creating a MachinePoolScope")
+		return nil, errors.New("Client is required when creating a MachinePoolScope")
 	}
 	if params.MachinePool == nil {
 		return nil, errors.New("machinepool is required when creating a MachinePoolScope")

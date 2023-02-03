@@ -97,7 +97,7 @@ func TestReconcileBucket(t *testing.T) {
 		client := fake.NewClientBuilder().WithScheme(scheme).Build()
 
 		longName := strings.Repeat("a", 40)
-		scope, err := scope.NewClusterScope(scope.ClusterScopeParams{
+		clusterScope, err := scope.NewClusterScope(scope.ClusterScopeParams{
 			Client: client,
 			Cluster: &clusterv1.Cluster{
 				ObjectMeta: metav1.ObjectMeta{
@@ -115,7 +115,7 @@ func TestReconcileBucket(t *testing.T) {
 			t.Fatalf("Failed to create test context: %v", err)
 		}
 
-		svc := s3.NewService(scope)
+		svc := s3.NewService(clusterScope)
 		svc.S3Client = s3Mock
 		svc.STSClient = stsMock
 
@@ -420,7 +420,7 @@ func TestCreateObject(t *testing.T) {
 			})
 		}).Return(nil, nil).Times(1)
 
-		bootstrapDataURL, err := svc.Create(machineScope, bootstrapData)
+		bootstrapDataURL, err := svc.Create(machineScope.Name(), bootstrapData)
 		if err != nil {
 			t.Fatalf("Unexpected error, got: %v", err)
 		}
@@ -466,10 +466,10 @@ func TestCreateObject(t *testing.T) {
 
 		boostrapData := []byte("foo")
 
-		if _, err := svc.Create(machineScope, boostrapData); err != nil {
+		if _, err := svc.Create(machineScope.Name(), boostrapData); err != nil {
 			t.Fatalf("Unexpected error: %v", err)
 		}
-		if _, err := svc.Create(machineScope, boostrapData); err != nil {
+		if _, err := svc.Create(machineScope.Name(), boostrapData); err != nil {
 			t.Fatalf("Unexpected error: %v", err)
 		}
 	})
@@ -493,7 +493,7 @@ func TestCreateObject(t *testing.T) {
 
 			s3Mock.EXPECT().PutObject(gomock.Any()).Return(nil, errors.New("foo")).Times(1)
 
-			bootstrapDataURL, err := svc.Create(machineScope, []byte("foo"))
+			bootstrapDataURL, err := svc.Create(machineScope.Name(), []byte("foo"))
 			if err == nil {
 				t.Fatalf("Expected error")
 			}
@@ -508,7 +508,7 @@ func TestCreateObject(t *testing.T) {
 
 			svc, _ := testService(t, &infrav1.S3Bucket{})
 
-			bootstrapDataURL, err := svc.Create(nil, []byte("foo"))
+			bootstrapDataURL, err := svc.Create("", []byte("foo"))
 			if err == nil {
 				t.Fatalf("Expected error")
 			}
@@ -533,7 +533,7 @@ func TestCreateObject(t *testing.T) {
 				},
 			}
 
-			bootstrapDataURL, err := svc.Create(machineScope, []byte{})
+			bootstrapDataURL, err := svc.Create(machineScope.Name(), []byte{})
 			if err == nil {
 				t.Fatalf("Expected error")
 			}
@@ -557,7 +557,7 @@ func TestCreateObject(t *testing.T) {
 				},
 			}
 
-			bootstrapDataURL, err := svc.Create(machineScope, []byte("foo"))
+			bootstrapDataURL, err := svc.Create(machineScope.Name(), []byte("foo"))
 			if err == nil {
 				t.Fatalf("Expected error")
 			}
@@ -620,7 +620,7 @@ func TestDeleteObject(t *testing.T) {
 			})
 		}).Return(nil, nil).Times(1)
 
-		if err := svc.Delete(machineScope); err != nil {
+		if err := svc.Delete(machineScope.Name()); err != nil {
 			t.Fatalf("Unexpected error, got: %v", err)
 		}
 	})
@@ -641,7 +641,7 @@ func TestDeleteObject(t *testing.T) {
 
 		s3Mock.EXPECT().DeleteObject(gomock.Any()).Return(nil, awserr.New(s3svc.ErrCodeNoSuchBucket, "", nil)).Times(1)
 
-		if err := svc.Delete(machineScope); err != nil {
+		if err := svc.Delete(machineScope.Name()); err != nil {
 			t.Fatalf("Unexpected error, got: %v", err)
 		}
 	})
@@ -665,7 +665,7 @@ func TestDeleteObject(t *testing.T) {
 
 			s3Mock.EXPECT().DeleteObject(gomock.Any()).Return(nil, errors.New("foo")).Times(1)
 
-			if err := svc.Delete(machineScope); err == nil {
+			if err := svc.Delete(machineScope.Name()); err == nil {
 				t.Fatalf("Expected error")
 			}
 		})
@@ -675,7 +675,7 @@ func TestDeleteObject(t *testing.T) {
 
 			svc, _ := testService(t, &infrav1.S3Bucket{})
 
-			if err := svc.Delete(nil); err == nil {
+			if err := svc.Delete(""); err == nil {
 				t.Fatalf("Expected error")
 			}
 		})
@@ -694,7 +694,7 @@ func TestDeleteObject(t *testing.T) {
 				},
 			}
 
-			if err := svc.Delete(machineScope); err == nil {
+			if err := svc.Delete(machineScope.Name()); err == nil {
 				t.Fatalf("Expected error")
 			}
 		})
@@ -716,11 +716,11 @@ func TestDeleteObject(t *testing.T) {
 
 		s3Mock.EXPECT().DeleteObject(gomock.Any()).Return(nil, nil).Times(2)
 
-		if err := svc.Delete(machineScope); err != nil {
+		if err := svc.Delete(machineScope.Name()); err != nil {
 			t.Fatalf("Unexpected error: %v", err)
 		}
 
-		if err := svc.Delete(machineScope); err != nil {
+		if err := svc.Delete(machineScope.Name()); err != nil {
 			t.Fatalf("Unexpected error: %v", err)
 		}
 	})
@@ -740,7 +740,7 @@ func testService(t *testing.T, bucket *infrav1.S3Bucket) (*s3.Service, *mock_s3i
 	_ = infrav1.AddToScheme(scheme)
 	client := fake.NewClientBuilder().WithScheme(scheme).Build()
 
-	scope, err := scope.NewClusterScope(scope.ClusterScopeParams{
+	clusterScope, err := scope.NewClusterScope(scope.ClusterScopeParams{
 		Client: client,
 		Cluster: &clusterv1.Cluster{
 			ObjectMeta: metav1.ObjectMeta{
@@ -758,7 +758,7 @@ func testService(t *testing.T, bucket *infrav1.S3Bucket) (*s3.Service, *mock_s3i
 		t.Fatalf("Failed to create test context: %v", err)
 	}
 
-	svc := s3.NewService(scope)
+	svc := s3.NewService(clusterScope)
 	svc.S3Client = s3Mock
 	svc.STSClient = stsMock
 

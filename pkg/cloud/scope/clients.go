@@ -56,7 +56,7 @@ import (
 	"sigs.k8s.io/cluster-api-provider-aws/v2/version"
 )
 
-// NewASGClient creates a new ASG API client for a given session.
+// NewASGClient creates a new ASG API Client for a given session.
 func NewASGClient(scopeUser cloud.ScopeUsage, session cloud.Session, logger logger.Wrapper, target runtime.Object) autoscalingiface.AutoScalingAPI {
 	asgClient := autoscaling.New(session.Session(), aws.NewConfig().WithLogLevel(awslogs.GetAWSLogLevel(logger.GetLogger())).WithLogger(awslogs.NewWrapLogr(logger.GetLogger())))
 	asgClient.Handlers.Build.PushFrontNamed(getUserAgentHandler())
@@ -66,7 +66,7 @@ func NewASGClient(scopeUser cloud.ScopeUsage, session cloud.Session, logger logg
 	return asgClient
 }
 
-// NewEC2Client creates a new EC2 API client for a given session.
+// NewEC2Client creates a new EC2 API Client for a given session.
 func NewEC2Client(scopeUser cloud.ScopeUsage, session cloud.Session, logger logger.Wrapper, target runtime.Object) ec2iface.EC2API {
 	ec2Client := ec2.New(session.Session(), aws.NewConfig().WithLogLevel(awslogs.GetAWSLogLevel(logger.GetLogger())).WithLogger(awslogs.NewWrapLogr(logger.GetLogger())))
 	ec2Client.Handlers.Build.PushFrontNamed(getUserAgentHandler())
@@ -82,7 +82,7 @@ func NewEC2Client(scopeUser cloud.ScopeUsage, session cloud.Session, logger logg
 	return ec2Client
 }
 
-// NewELBClient creates a new ELB API client for a given session.
+// NewELBClient creates a new ELB API Client for a given session.
 func NewELBClient(scopeUser cloud.ScopeUsage, session cloud.Session, logger logger.Wrapper, target runtime.Object) elbiface.ELBAPI {
 	elbClient := elb.New(session.Session(), aws.NewConfig().WithLogLevel(awslogs.GetAWSLogLevel(logger.GetLogger())).WithLogger(awslogs.NewWrapLogr(logger.GetLogger())))
 	elbClient.Handlers.Build.PushFrontNamed(getUserAgentHandler())
@@ -94,7 +94,7 @@ func NewELBClient(scopeUser cloud.ScopeUsage, session cloud.Session, logger logg
 	return elbClient
 }
 
-// NewELBv2Client creates a new ELB v2 API client for a given session.
+// NewELBv2Client creates a new ELB v2 API Client for a given session.
 func NewELBv2Client(scopeUser cloud.ScopeUsage, session cloud.Session, logger logger.Wrapper, target runtime.Object) elbv2iface.ELBV2API {
 	elbClient := elbv2.New(session.Session(), aws.NewConfig().WithLogLevel(awslogs.GetAWSLogLevel(logger.GetLogger())).WithLogger(awslogs.NewWrapLogr(logger.GetLogger())))
 	elbClient.Handlers.Build.PushFrontNamed(getUserAgentHandler())
@@ -106,7 +106,7 @@ func NewELBv2Client(scopeUser cloud.ScopeUsage, session cloud.Session, logger lo
 	return elbClient
 }
 
-// NewEventBridgeClient creates a new EventBridge API client for a given session.
+// NewEventBridgeClient creates a new EventBridge API Client for a given session.
 func NewEventBridgeClient(scopeUser cloud.ScopeUsage, session cloud.Session, target runtime.Object) eventbridgeiface.EventBridgeAPI {
 	eventBridgeClient := eventbridge.New(session.Session())
 	eventBridgeClient.Handlers.Build.PushFrontNamed(getUserAgentHandler())
@@ -116,7 +116,7 @@ func NewEventBridgeClient(scopeUser cloud.ScopeUsage, session cloud.Session, tar
 	return eventBridgeClient
 }
 
-// NewSQSClient creates a new SQS API client for a given session.
+// NewSQSClient creates a new SQS API Client for a given session.
 func NewSQSClient(scopeUser cloud.ScopeUsage, session cloud.Session, target runtime.Object) sqsiface.SQSAPI {
 	SQSClient := sqs.New(session.Session())
 	SQSClient.Handlers.Build.PushFrontNamed(getUserAgentHandler())
@@ -126,7 +126,7 @@ func NewSQSClient(scopeUser cloud.ScopeUsage, session cloud.Session, target runt
 	return SQSClient
 }
 
-// NewGlobalSQSClient for creating a new SQS API client that isn't tied to a cluster.
+// NewGlobalSQSClient for creating a new SQS API Client that isn't tied to a cluster.
 func NewGlobalSQSClient(scopeUser cloud.ScopeUsage, session cloud.Session) sqsiface.SQSAPI {
 	SQSClient := sqs.New(session.Session())
 	SQSClient.Handlers.Build.PushFrontNamed(getUserAgentHandler())
@@ -135,7 +135,7 @@ func NewGlobalSQSClient(scopeUser cloud.ScopeUsage, session cloud.Session) sqsif
 	return SQSClient
 }
 
-// NewResourgeTaggingClient creates a new Resource Tagging API client for a given session.
+// NewResourgeTaggingClient creates a new Resource Tagging API Client for a given session.
 func NewResourgeTaggingClient(scopeUser cloud.ScopeUsage, session cloud.Session, logger logger.Wrapper, target runtime.Object) resourcegroupstaggingapiiface.ResourceGroupsTaggingAPIAPI {
 	resourceTagging := resourcegroupstaggingapi.New(session.Session(), aws.NewConfig().WithLogLevel(awslogs.GetAWSLogLevel(logger.GetLogger())).WithLogger(awslogs.NewWrapLogr(logger.GetLogger())))
 	resourceTagging.Handlers.Build.PushFrontNamed(getUserAgentHandler())
@@ -147,7 +147,7 @@ func NewResourgeTaggingClient(scopeUser cloud.ScopeUsage, session cloud.Session,
 	return resourceTagging
 }
 
-// NewSecretsManagerClient creates a new Secrets API client for a given session..
+// NewSecretsManagerClient creates a new Secrets API Client for a given session..
 func NewSecretsManagerClient(scopeUser cloud.ScopeUsage, session cloud.Session, logger logger.Wrapper, target runtime.Object) secretsmanageriface.SecretsManagerAPI {
 	secretsClient := secretsmanager.New(session.Session(), aws.NewConfig().WithLogLevel(awslogs.GetAWSLogLevel(logger.GetLogger())).WithLogger(awslogs.NewWrapLogr(logger.GetLogger())))
 	secretsClient.Handlers.Build.PushFrontNamed(getUserAgentHandler())
@@ -159,7 +159,7 @@ func NewSecretsManagerClient(scopeUser cloud.ScopeUsage, session cloud.Session, 
 	return secretsClient
 }
 
-// NewEKSClient creates a new EKS API client for a given session.
+// NewEKSClient creates a new EKS API Client for a given session.
 func NewEKSClient(scopeUser cloud.ScopeUsage, session cloud.Session, logger logger.Wrapper, target runtime.Object) eksiface.EKSAPI {
 	eksClient := eks.New(session.Session(), aws.NewConfig().WithLogLevel(awslogs.GetAWSLogLevel(logger.GetLogger())).WithLogger(awslogs.NewWrapLogr(logger.GetLogger())))
 	eksClient.Handlers.Build.PushFrontNamed(getUserAgentHandler())
@@ -169,7 +169,7 @@ func NewEKSClient(scopeUser cloud.ScopeUsage, session cloud.Session, logger logg
 	return eksClient
 }
 
-// NewIAMClient creates a new IAM API client for a given session.
+// NewIAMClient creates a new IAM API Client for a given session.
 func NewIAMClient(scopeUser cloud.ScopeUsage, session cloud.Session, logger logger.Wrapper, target runtime.Object) iamiface.IAMAPI {
 	iamClient := iam.New(session.Session(), aws.NewConfig().WithLogLevel(awslogs.GetAWSLogLevel(logger.GetLogger())).WithLogger(awslogs.NewWrapLogr(logger.GetLogger())))
 	iamClient.Handlers.Build.PushFrontNamed(getUserAgentHandler())
@@ -179,7 +179,7 @@ func NewIAMClient(scopeUser cloud.ScopeUsage, session cloud.Session, logger logg
 	return iamClient
 }
 
-// NewSTSClient creates a new STS API client for a given session.
+// NewSTSClient creates a new STS API Client for a given session.
 func NewSTSClient(scopeUser cloud.ScopeUsage, session cloud.Session, logger logger.Wrapper, target runtime.Object) stsiface.STSAPI {
 	stsClient := sts.New(session.Session(), aws.NewConfig().WithLogLevel(awslogs.GetAWSLogLevel(logger.GetLogger())).WithLogger(awslogs.NewWrapLogr(logger.GetLogger())))
 	stsClient.Handlers.Build.PushFrontNamed(getUserAgentHandler())
@@ -189,7 +189,7 @@ func NewSTSClient(scopeUser cloud.ScopeUsage, session cloud.Session, logger logg
 	return stsClient
 }
 
-// NewSSMClient creates a new Secrets API client for a given session.
+// NewSSMClient creates a new Secrets API Client for a given session.
 func NewSSMClient(scopeUser cloud.ScopeUsage, session cloud.Session, logger logger.Wrapper, target runtime.Object) ssmiface.SSMAPI {
 	ssmClient := ssm.New(session.Session(), aws.NewConfig().WithLogLevel(awslogs.GetAWSLogLevel(logger.GetLogger())).WithLogger(awslogs.NewWrapLogr(logger.GetLogger())))
 	ssmClient.Handlers.Build.PushFrontNamed(getUserAgentHandler())
@@ -199,7 +199,7 @@ func NewSSMClient(scopeUser cloud.ScopeUsage, session cloud.Session, logger logg
 	return ssmClient
 }
 
-// NewS3Client creates a new S3 API client for a given session.
+// NewS3Client creates a new S3 API Client for a given session.
 func NewS3Client(scopeUser cloud.ScopeUsage, session cloud.Session, logger logger.Wrapper, target runtime.Object) s3iface.S3API {
 	s3Client := s3.New(session.Session(), aws.NewConfig().WithLogLevel(awslogs.GetAWSLogLevel(logger.GetLogger())).WithLogger(awslogs.NewWrapLogr(logger.GetLogger())))
 	s3Client.Handlers.Build.PushFrontNamed(getUserAgentHandler())

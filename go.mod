@@ -12,6 +12,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.213
 	github.com/awslabs/goformation/v4 v4.19.5
 	github.com/blang/semver v3.5.1+incompatible
+	github.com/cert-manager/cert-manager v1.8.2
 	github.com/flatcar/ignition v0.36.2
 	github.com/go-logr/logr v1.2.4
 	github.com/gofrs/flock v0.8.1
@@ -159,9 +160,9 @@ require (
 	k8s.io/cluster-bootstrap v0.25.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20230109183929-3758b55a6596 // indirect
 	k8s.io/kubectl v0.25.2 // indirect
+	sigs.k8s.io/gateway-api v0.4.1 // indirect
 	sigs.k8s.io/json v0.0.0-20220713155537-f223a00ba0e2 // indirect
 	sigs.k8s.io/kind v0.18.0 // indirect
 	sigs.k8s.io/kustomize/kyaml v0.14.2 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
-
 )

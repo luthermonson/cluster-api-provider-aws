@@ -20,11 +20,14 @@ import (
 	"context"
 	"fmt"
 
+	"sigs.k8s.io/cluster-api/controllers/remote"
+
 	awsclient "github.com/aws/aws-sdk-go/aws/client"
 	"github.com/pkg/errors"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"sigs.k8s.io/cluster-api-provider-aws/v2/api/v1beta2"
 	infrav1 "sigs.k8s.io/cluster-api-provider-aws/v2/api/v1beta2"
 	"sigs.k8s.io/cluster-api-provider-aws/v2/pkg/cloud"
 	"sigs.k8s.io/cluster-api-provider-aws/v2/pkg/cloud/throttle"
@@ -33,6 +36,14 @@ import (
 	clusterv1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/cluster-api/util/conditions"
 	"sigs.k8s.io/cluster-api/util/patch"
+)
+
+const (
+	// KubeconfigReadyAnnotation is the key for the cluster object annotation
+	// which tracks if the Kubeconfig is available to communicate with the workload cluster
+	// See https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+	// for annotation formatting rules.
+	KubeconfigReadyAnnotation = "sigs.k8s.io/cluster-api-provider-aws-kubeconfig-ready"
 )
 
 // ClusterScopeParams defines the input parameters used to create a new Scope.
@@ -64,7 +75,7 @@ func NewClusterScope(params ClusterScopeParams) (*ClusterScope, error) {
 
 	clusterScope := &ClusterScope{
 		Logger:                       *params.Logger,
-		client:                       params.Client,
+		Client:                       params.Client,
 		Cluster:                      params.Cluster,
 		AWSCluster:                   params.AWSCluster,
 		controllerName:               params.ControllerName,
@@ -91,7 +102,7 @@ func NewClusterScope(params ClusterScopeParams) (*ClusterScope, error) {
 // ClusterScope defines the basic context for an actuator to operate upon.
 type ClusterScope struct {
 	logger.Logger
-	client      client.Client
+	Client      client.Client
 	patchHelper *patch.Helper
 
 	Cluster    *clusterv1.Cluster
@@ -102,6 +113,27 @@ type ClusterScope struct {
 	controllerName  string
 
 	tagUnmanagedNetworkResources bool
+}
+
+// RemoteClient returns the Kubernetes Client for connecting to the workload cluster.
+func (s *ClusterScope) RemoteClient() (client.Client, error) {
+	clusterKey := client.ObjectKey{
+		Name:      s.Name(),
+		Namespace: s.Namespace(),
+	}
+
+	restConfig, err := remote.RESTConfig(context.Background(), s.Cluster.Name, s.Client, clusterKey)
+	if err != nil {
+		return nil, fmt.Errorf("getting remote rest config for %s/%s: %w", s.Namespace(), s.Name(), err)
+	}
+	restConfig.Timeout = DefaultKubeClientTimeout
+
+	return client.New(restConfig, client.Options{Scheme: scheme})
+}
+
+// ManagementClient returns the Kubernetes Client for the management cluster.
+func (s *ClusterScope) ManagementClient() client.Client {
+	return s.Client
 }
 
 // Network returns the cluster network object.
@@ -330,6 +362,15 @@ func (s *ClusterScope) Bastion() *infrav1.Bastion {
 // TagUnmanagedNetworkResources returns if the feature flag tag unmanaged network resources is set.
 func (s *ClusterScope) TagUnmanagedNetworkResources() bool {
 	return s.tagUnmanagedNetworkResources
+}
+
+// AssociateOIDCProvider returns if the cluster should have an OIDC Provider Associated
+func (s *ClusterScope) AssociateOIDCProvider() bool {
+	return s.AWSCluster.Spec.AssociateOIDCProvider
+}
+
+func (s *ClusterScope) OIDCProviderStatus() *v1beta2.OIDCProviderStatus {
+	return &s.AWSCluster.Status.OIDCProvider
 }
 
 // SetBastionInstance sets the bastion instance in the status of the cluster.

@@ -54,7 +54,7 @@ type MachineScopeParams struct {
 // This is meant to be called for each reconcile iteration.
 func NewMachineScope(params MachineScopeParams) (*MachineScope, error) {
 	if params.Client == nil {
-		return nil, errors.New("client is required when creating a MachineScope")
+		return nil, errors.New("Client is required when creating a MachineScope")
 	}
 	if params.Machine == nil {
 		return nil, errors.New("machine is required when creating a MachineScope")

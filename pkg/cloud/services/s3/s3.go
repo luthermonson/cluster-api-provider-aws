@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
-	"path"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -110,54 +109,63 @@ func (s *Service) DeleteBucket() error {
 	return nil
 }
 
-func (s *Service) Create(m *scope.MachineScope, data []byte) (string, error) {
+// Create
+func (s *Service) Create(key string, data []byte) (string, error) {
+	// server side encryption, acl defaults to private
+	return s.create(&s3.PutObjectInput{
+		Body:                 aws.ReadSeekCloser(bytes.NewReader(data)),
+		Bucket:               aws.String(s.scope.Bucket().Name),
+		Key:                  aws.String(key),
+		ServerSideEncryption: aws.String("aws:kms"),
+	})
+}
+
+// CreatePublic
+func (s *Service) CreatePublic(key string, data []byte) (string, error) {
+	// acl public-read
+	return s.create(&s3.PutObjectInput{
+		Body:   aws.ReadSeekCloser(bytes.NewReader(data)),
+		Bucket: aws.String(s.scope.Bucket().Name),
+		Key:    aws.String(key),
+		ACL:    aws.String("public-read"),
+	})
+}
+
+func (s *Service) create(putInput *s3.PutObjectInput) (string, error) {
 	if !s.bucketManagementEnabled() {
 		return "", errors.New("requested object creation but bucket management is not enabled")
 	}
 
-	if m == nil {
-		return "", errors.New("machine scope can't be nil")
+	if aws.StringValue(putInput.Key) == "" {
+		return "", errors.New("empty key")
 	}
 
-	if len(data) == 0 {
-		return "", errors.New("got empty data")
-	}
+	s.scope.Info("Creating public object", "bucket_name", aws.StringValue(putInput.Bucket), "key", aws.StringValue(putInput.Key))
 
-	bucket := s.bucketName()
-	key := s.bootstrapDataKey(m)
-
-	s.scope.Info("Creating object", "bucket_name", bucket, "key", key)
-
-	if _, err := s.S3Client.PutObject(&s3.PutObjectInput{
-		Body:                 aws.ReadSeekCloser(bytes.NewReader(data)),
-		Bucket:               aws.String(bucket),
-		Key:                  aws.String(key),
-		ServerSideEncryption: aws.String("aws:kms"),
-	}); err != nil {
+	if _, err := s.S3Client.PutObject(putInput); err != nil {
 		return "", errors.Wrap(err, "putting object")
 	}
 
 	objectURL := &url.URL{
 		Scheme: "s3",
-		Host:   bucket,
-		Path:   key,
+		Host:   aws.StringValue(putInput.Bucket),
+		Path:   aws.StringValue(putInput.Key),
 	}
 
 	return objectURL.String(), nil
 }
 
-func (s *Service) Delete(m *scope.MachineScope) error {
+// Delete takes a key which is a s3 path to an object e.g. /path/file.ext
+func (s *Service) Delete(key string) error {
 	if !s.bucketManagementEnabled() {
 		return errors.New("requested object creation but bucket management is not enabled")
 	}
 
-	if m == nil {
-		return errors.New("machine scope can't be nil")
+	if key == "" {
+		return errors.New("got empty key")
 	}
 
 	bucket := s.bucketName()
-	key := s.bootstrapDataKey(m)
-
 	s.scope.Info("Deleting object", "bucket_name", bucket, "key", key)
 
 	_, err := s.S3Client.DeleteObject(&s3.DeleteObjectInput{
@@ -282,9 +290,4 @@ func (s *Service) bucketManagementEnabled() bool {
 
 func (s *Service) bucketName() string {
 	return s.scope.Bucket().Name
-}
-
-func (s *Service) bootstrapDataKey(m *scope.MachineScope) string {
-	// Use machine name as object key.
-	return path.Join(m.Role(), m.Name())
 }

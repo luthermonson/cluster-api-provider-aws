@@ -20,6 +20,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"sigs.k8s.io/cluster-api-provider-aws/v2/api/v1beta2"
 	infrav1 "sigs.k8s.io/cluster-api-provider-aws/v2/api/v1beta2"
 	clusterv1 "sigs.k8s.io/cluster-api/api/v1beta1"
 )
@@ -221,14 +222,6 @@ type EncryptionConfig struct {
 	Resources []*string `json:"resources,omitempty"`
 }
 
-// OIDCProviderStatus holds the status of the AWS OIDC identity provider.
-type OIDCProviderStatus struct {
-	// ARN holds the ARN of the provider
-	ARN string `json:"arn,omitempty"`
-	// TrustPolicy contains the boilerplate IAM trust policy to use for IRSA
-	TrustPolicy string `json:"trustPolicy,omitempty"`
-}
-
 type IdentityProviderStatus struct {
 	// ARN holds the ARN of associated identity provider
 	ARN string `json:"arn,omitempty"`
@@ -250,7 +243,7 @@ type AWSManagedControlPlaneStatus struct {
 	Bastion *infrav1.Instance `json:"bastion,omitempty"`
 	// OIDCProvider holds the status of the identity provider for this cluster
 	// +optional
-	OIDCProvider OIDCProviderStatus `json:"oidcProvider,omitempty"`
+	OIDCProvider v1beta2.OIDCProviderStatus `json:"oidcProvider,omitempty"`
 	// ExternalManagedControlPlane indicates to cluster-api that the control plane
 	// is managed by an external service such as AKS, EKS, GKE, etc.
 	// +kubebuilder:default=true

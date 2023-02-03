@@ -17,6 +17,8 @@ limitations under the License.
 package v1beta1
 
 import (
+	apimachineryconversion "k8s.io/apimachinery/pkg/conversion"
+	"sigs.k8s.io/cluster-api-provider-aws/v2/api/v1beta2"
 	infrav2 "sigs.k8s.io/cluster-api-provider-aws/v2/api/v1beta2"
 	utilconversion "sigs.k8s.io/cluster-api/util/conversion"
 	"sigs.k8s.io/controller-runtime/pkg/conversion"
@@ -105,4 +107,8 @@ func (r *AWSClusterList) ConvertFrom(srcRaw conversion.Hub) error {
 	src := srcRaw.(*infrav2.AWSClusterList)
 
 	return Convert_v1beta2_AWSClusterList_To_v1beta1_AWSClusterList(src, r, nil)
+}
+
+func Convert_v1beta2_AWSClusterStatus_To_v1beta1_AWSClusterStatus(in *v1beta2.AWSClusterStatus, out *AWSClusterStatus, scope apimachineryconversion.Scope) error {
+	return autoConvert_v1beta2_AWSClusterStatus_To_v1beta1_AWSClusterStatus(in, out, scope)
 }
